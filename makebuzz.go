@@ -49,29 +49,26 @@ func main() {
 	// Start fetching new headlines
 	feeds := CreateFeeds()
 	pollChan := feeds.Poll(10 * time.Second)
-	var nextTweetChan <-chan time.Time
+	nextTweetChan := time.After(1 * time.Millisecond)
 
 	LoadExistingHeadlines()
 
 	for {
+		// Wait until RSS feeds have been updated
 		<-pollChan
 
 		avg := Headlines(FetchedHeadlines).AverageWords()
 
+		// dump out some headlines for sample use
 		for i := 0; i < 100; i++ {
 			fmt.Println(HeadlineChain.Generate(avg))
 		}
 
-		if GlobalConfig.Twitter.PostTweet && nextTweetChan == nil {
-			nextTweetChan = time.After(timeBetweenTweets())
-			PostTweet(HeadlineChain.Generate(avg))
-			continue
-		}
-
 		if GlobalConfig.Twitter.PostTweet {
+			// If we can't tweet within one second, continue
 			select {
 			case <-time.After(1 * time.Second):
-				continue
+				break
 			case <-nextTweetChan:
 				PostTweet(HeadlineChain.Generate(avg))
 				nextTweetChan = time.After(timeBetweenTweets())
@@ -79,14 +76,14 @@ func main() {
 			}
 		}
 	}
-
-	// Create a new markov
 }
 
+// Time to wait between tweets
 func timeBetweenTweets() time.Duration {
 	return 1 * time.Hour
 }
 
+// Loads saved BuzzFeed headlines
 func LoadExistingHeadlines() {
 	var headlines []string
 
@@ -118,6 +115,7 @@ func LoadExistingHeadlines() {
 	}
 }
 
+// Saves grabbed headlines to the output file for use at a later date (like after a restart)
 func SaveHeadlines() {
 	file, err := os.OpenFile(savedHeadlinesFileName, os.O_CREATE|os.O_WRONLY, 0775)
 	if err != nil {
