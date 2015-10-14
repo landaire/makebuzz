@@ -5,7 +5,7 @@ import (
 
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/naoina/toml"
 )
 
 const (
@@ -25,8 +25,8 @@ type TwitterConfig struct {
 }
 
 type Config struct {
-	BuzzFeed BuzzFeedConfig
-	Twitter  TwitterConfig
+	BuzzFeed BuzzFeedConfig `toml:"buzzfeed"`
+	Twitter  TwitterConfig `toml:"twitter"`
 }
 
 var (
@@ -44,7 +44,9 @@ func ParseConfig() *Config {
 
 	defer file.Close()
 
-	if _, err := toml.DecodeReader(file, &out); err != nil {
+	decoder := toml.NewDecoder(file)
+
+	if err := decoder.Decode(&out); err != nil {
 		Logger.Fatalln(err)
 		return nil
 	}
