@@ -1,0 +1,15 @@
+[buzzfeed]
+# Other feeds not listed include brasil, espanol, and france
+feeds = ["fwd", "lol", "win", "omg", "cute","trashy",
+		"fail", "wtf", "quiz", "brasil", "world", "australia",
+		"geeky", "comics", "books", "community", "travel", "longform",
+		"music", "animals", "espanol","usnews", "lgbt", "puzzles", "sports",
+		"politics", "tech", "tvandmovies", "health",
+		"diy", "food", "rewind", "celebrity", "comedy",
+		"ideas", "weddings"]
+
+[twitter]
+consumer       = ""
+consumerSecret = ""
+accessToken    = ""
+secret         = ""
