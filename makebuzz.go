@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
-    "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 var (
 	ChainLock     sync.RWMutex
 	HeadlineChain *Chain
-	Logger *logrus.Logger
+	Logger        *logrus.Logger
 )
 
 func init() {
@@ -57,32 +57,33 @@ func main() {
 		<-pollChan
 
 		avg := Headlines(FetchedHeadlines).AverageWords()
-		fmt.Println(avg)
 
-//		for i := 0; i < 10; i++ {
-//			fmt.Println(HeadlineChain.Generate(avg))
-//		}
+		for i := 0; i < 100; i++ {
+			fmt.Println(HeadlineChain.Generate(avg))
+		}
 
-		if nextTweetChan == nil {
-			nextTweetChan = time.After(duration())
-//			PostTweet(HeadlineChain.Generate(avg))
+		if GlobalConfig.Twitter.PostTweet && nextTweetChan == nil {
+			nextTweetChan = time.After(timeBetweenTweets())
+			PostTweet(HeadlineChain.Generate(avg))
 			continue
 		}
 
-		select {
-		case <-time.After(1 * time.Second):
-			continue
-		case <-nextTweetChan:
-//			PostTweet(HeadlineChain.Generate(avg))
-			nextTweetChan = time.After(duration())
-			break
+		if GlobalConfig.Twitter.PostTweet {
+			select {
+			case <-time.After(1 * time.Second):
+				continue
+			case <-nextTweetChan:
+				PostTweet(HeadlineChain.Generate(avg))
+				nextTweetChan = time.After(timeBetweenTweets())
+				break
+			}
 		}
 	}
 
 	// Create a new markov
 }
 
-func duration() time.Duration {
+func timeBetweenTweets() time.Duration {
 	return 1 * time.Hour
 }
 
@@ -105,7 +106,6 @@ func LoadExistingHeadlines() {
 		return
 	}
 
-
 	ChainLock.Lock()
 	FetchedHeadlinesLock.Lock()
 	defer ChainLock.Unlock()
@@ -119,7 +119,7 @@ func LoadExistingHeadlines() {
 }
 
 func SaveHeadlines() {
-	file, err := os.OpenFile(savedHeadlinesFileName, os.O_CREATE | os.O_WRONLY, 0775)
+	file, err := os.OpenFile(savedHeadlinesFileName, os.O_CREATE|os.O_WRONLY, 0775)
 	if err != nil {
 		Logger.Errorln(err)
 		return

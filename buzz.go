@@ -44,8 +44,6 @@ func CreateFeeds() BuzzFeeds {
 		feeds = append(feeds, &BuzzFeedRss{rss.New(timeout, true, feedChannelHandler, feedItemHandler)})
 	}
 
-	fmt.Println(feeds)
-
 	return feeds
 }
 
@@ -62,8 +60,6 @@ func (this BuzzFeeds) Poll(timeout time.Duration) <-chan bool {
 				feed.Poll(feedUrl, nil)
 			}
 
-			fmt.Println("done")
-
 			// Write to the output file
 			SaveHeadlines()
 
@@ -77,7 +73,7 @@ func (this BuzzFeeds) Poll(timeout time.Duration) <-chan bool {
 
 // Polls the RSS feed for new channels and items
 func (feed *BuzzFeedRss) Poll(feedUrl string, cr xmlx.CharsetFunc) {
-	fmt.Println("Fetching feed ", feedUrl)
+	Logger.Println("Fetching feed ", feedUrl)
 	if err := feed.Fetch(feedUrl, cr); err != nil {
 		Logger.Errorf("%s: %s\n", feedUrl, err)
 	}
@@ -129,7 +125,6 @@ func WordCount(s string) int {
 
 func feedChannelHandler(feed *rss.Feed, newchannels []*rss.Channel) {
 	// really do nothing with these -- they're not useful
-	fmt.Printf("%d new channel(s) in %s\n", len(newchannels), feed.Url)
 }
 
 func feedItemHandler(feed *rss.Feed, ch *rss.Channel, newitems []*rss.Item) {
@@ -146,10 +141,10 @@ func feedItemHandler(feed *rss.Feed, ch *rss.Channel, newitems []*rss.Item) {
 			}
 		}
 
-		fmt.Println("Adding headline", item.Title)
+		Logger.Println("Adding headline", item.Title)
 		HeadlineChain.Build(strings.NewReader(item.Title))
 		FetchedHeadlines = append(FetchedHeadlines, item.Title)
 	}
 
-	fmt.Printf("%d new item(s) in %s\n", len(newitems), feed.Url)
+	Logger.Printf("%d new item(s) in %s\n", len(newitems), feed.Url)
 }

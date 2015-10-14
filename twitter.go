@@ -14,10 +14,11 @@ var (
 	twitterClient *anaconda.TwitterApi
 )
 
-func init() {
-}
-
 func PostTweet(t string) {
+	if !GlobalConfig.Twitter.IsValid() {
+		return
+	}
+
 	if twitterClient == nil {
 		twitterConfig := GlobalConfig.Twitter
 

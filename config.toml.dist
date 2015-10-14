@@ -9,7 +9,8 @@ feeds = ["fwd", "lol", "win", "omg", "cute","trashy",
 		"ideas", "weddings"]
 
 [twitter]
-consumer       = ""
-consumerSecret = ""
-accessToken    = ""
-secret         = ""
+post_tweet           = false
+consumer_token       = ""
+consumer_secret      = ""
+access_token         = ""
+access_secret        = ""

@@ -1,5 +1,9 @@
 package main
 
+//
+// Source: https://golang.org/doc/codewalk/markov/
+//
+
 import (
 	"bufio"
 	"fmt"

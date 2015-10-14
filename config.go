@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"strings"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -15,8 +17,11 @@ type BuzzFeedConfig struct {
 }
 
 type TwitterConfig struct {
-	ConsumerToken, ConsumerSecret string
-	AccessToken, AccessSecret     string
+	PostTweet      bool   `toml:"post_tweet"`
+	ConsumerToken  string `toml:"consumer_token"`
+	ConsumerSecret string `toml:"consumer_secret"`
+	AccessToken    string `toml:"acces_token"`
+	AccessSecret   string `toml:"access_secret"`
 }
 
 type Config struct {
@@ -47,4 +52,16 @@ func ParseConfig() *Config {
 	GlobalConfig = &out
 
 	return &out
+}
+
+func (this TwitterConfig) IsValid() bool {
+	vals := []string{this.AccessSecret, this.AccessToken, this.ConsumerSecret, this.ConsumerToken}
+
+	for _, val := range vals {
+		if strings.TrimSpace(val) == "" {
+			return false
+		}
+	}
+
+	return true
 }
