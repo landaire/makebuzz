@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	prefixLength           = 1
+	prefixLength           = 2
 	savedHeadlinesFileName = "headlines.json"
 )
 
@@ -60,7 +60,7 @@ func main() {
 		avg := Headlines(FetchedHeadlines).AverageWords()
 
 		// dump out some headlines for sample use
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 10; i++ {
 			fmt.Println(HeadlineChain.Generate(avg))
 		}
 
@@ -70,7 +70,15 @@ func main() {
 			case <-time.After(1 * time.Second):
 				break
 			case <-nextTweetChan:
-				PostTweet(HeadlineChain.Generate(avg))
+				var result string
+				for {
+					result = HeadlineChain.Generate(avg)
+					if strings.HasSuffix(result, "?") || strings.HasSuffix(result, ".") ||
+						strings.HasSuffix(result, "!") || strings.HasSuffix(result, ":") {
+						break
+					}
+				}
+				PostTweet(result)
 				nextTweetChan = time.After(timeBetweenTweets())
 				break
 			}
